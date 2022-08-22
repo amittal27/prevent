@@ -1,10 +1,10 @@
-%% read data from csv
 
+%% read data from csv
 df_rso2 = readtable("2073\2073_rso2.csv");
 df_spo2 = readtable("2073\2073_spo2.csv");
 
 %% plot entire timeline
-
+figure
 plot(df_spo2, "timeCdt", "SpO2");
 hold on
 plot(df_rso2, "timeCdt", "rso2");
@@ -41,8 +41,6 @@ buffer_rso2 = 15; % 15 rows buffer = 1 minute buffer
 
 % get the corresponding time for the spo2 data for each hypoxia start
 hyp_start = table2array(df_spo2(first_rows(:,1),"timeCdt"));
-
-hyp_start = table2array(hyp_start);
 
 % find NIRS time closest to each SpO2 start time
 rso2_times = table2array(df_rso2(:,"timeCdt")); % create 1 col matrix
@@ -83,29 +81,42 @@ rso2_hyp = df_rso2(rel_rows_rso2,:);
 spo2_hyp = df_spo2(rel_rows_spo2,:);
 
 % remove irrelevant variables for sanity
-clear count counter1 counter2 buffer_rso2 i idx rel_rows_rso2 rel_rows_spo2 time spo2_row rso2_times first_rows
+clear count counter1 counter2 buffer_rso2 i idx rel_rows_rso2 rel_rows_spo2 time spo2_row rso2_times first_rows hyp_start val
     
 %% PLOT FILTERED TIME INTERVALS %%
 
 % create tiled plot
 figure
 t = tiledlayout(3, 1);
+rso2_row = 1;
+spo2_row = 1;
 
 % plot 1
 nexttile
-plot(rso2_hyp(1:interval_lengths(1,1),:),"timeCdt","rso2")
+plot(rso2_hyp(rso2_row:interval_lengths(1,1),:),"timeCdt","rso2")
 hold on
-plot(spo2_hyp(1:interval_lengths(1,2),:),"timeCdt","SpO2")
+plot(spo2_hyp(spo2_row:interval_lengths(1,2),:),"timeCdt","SpO2")
+
+rso2_row = rso2_row + interval_lengths(1,1);
+spo2_row = spo2_row + interval_lengths(1,2);
 
 % plot 2
 nexttile
-plot(rso2_hyp(1:interval_lengths(2,1),:),"timeCdt","rso2")
+plot(rso2_hyp(rso2_row:rso2_row+interval_lengths(2,1)-1,:),"timeCdt","rso2")
 hold on
-plot(spo2_hyp(1:interval_lengths(2,2),:),"timeCdt","SpO2")
+plot(spo2_hyp(spo2_row:spo2_row+interval_lengths(2,2)-1,:),"timeCdt","SpO2")
+
+rso2_row = rso2_row + interval_lengths(2,1);
+spo2_row = spo2_row + interval_lengths(2,2);
 
 % plot 3
 nexttile
-plot(rso2_hyp(1:interval_lengths(3,1),:),"timeCdt","rso2")
+plot(rso2_hyp(rso2_row:rso2_row+interval_lengths(3,1)-1,:),"timeCdt","rso2")
 hold on
-plot(spo2_hyp(1:interval_lengths(3,2),:),"timeCdt","SpO2")
+plot(spo2_hyp(spo2_row:spo2_row+interval_lengths(3,2)-1,:),"timeCdt","SpO2")
 
+rso2_row = rso2_row + interval_lengths(3,1);
+spo2_row = spo2_row + interval_lengths(3,2);
+
+% remove irrelevant variables for sanity
+clear rso2_row spo2_row

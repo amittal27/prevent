@@ -11,7 +11,7 @@ plot(df_rso2, "timeCdt", "rso2");
 hold on
 yline(80)
 
-%% FILTER SPO2 DATA %%
+%% GET HYPOXIC EPISODES %%
 % filter data for relevant time intervals
 
 spo2_mat = table2array(df_spo2(:,"SpO2")); % create 1 col matrix
@@ -36,18 +36,11 @@ end
 % remove irrelevant variables for sanity
 clear a b count d first_row i j spo2_mat;
 
-%% FILTER RSO2 DATA %%
+%% FILTER RSO2 AND SPO2 DATA %%
 buffer_rso2 = 15; % 15 rows buffer = 1 minute buffer
-buffer_spo2 = 60; % spo2 is collected every second
 
 % get the corresponding time for the spo2 data for each hypoxia start
-hyp_start = [];
-
-for i=1:length(first_rows)
-    hyp_start = [hyp_start; df_spo2(first_rows(i,1),"timeCdt")];
-end
-
-hyp_start = table2array(hyp_start);
+hyp_start = table2array(df_spo2(first_rows(:,1),"timeCdt"));
 
 % find NIRS time closest to each SpO2 start time
 rso2_times = table2array(df_rso2(:,"timeCdt")); % create 1 col matrix
@@ -84,28 +77,38 @@ for time=1:length(hyp_start)
 end
 
 % get desired table rows
-rso2_hyp = df_rso2(rel_rows,:);
+rso2_hyp = df_rso2(rel_rows_rso2,:);
 spo2_hyp = df_spo2(rel_rows_spo2,:);
 
 % remove irrelevant variables for sanity
-%clear buffer_rso2 buffer_spo2 hyp_start i idx rel_rows rso2_times time val
+clear count counter1 counter2 buffer_rso2 i idx rel_rows_rso2 rel_rows_spo2 time spo2_row rso2_times first_rows
     
 %% PLOT FILTERED TIME INTERVALS %%
-
-rso2_times = table2array(rso2_hyp(:,"timeCdt")); % create 1 col matrix
-rso2_d = diff(rso2_times); % used to determine each time interval
-num_tiles_rso2 = find(rso2_d > seconds(4)); % each row denotes end of time interval
-
-spo2_times = table2array(spo2_hyp(:,"timeCdt")); % create 1 col matrix
-spo2_d = diff(spo2_times); % used to determine each time interval
-num_tiles_spo2 = find(spo2_d > seconds(1)); % each row denotes end of time interval
 
 % create tiled plot
 figure
 t = tiledlayout(3, 1);
-nexttile
-plot(rso2_hyp(1:num_tiles(1),:),"timeCdt","rso2")
-hold on
-plot(rso2_hyp(1:num_tiles(1),:),"timeCdt","rso2")
+rso2_row = 1
+spo2_row = 1
 
+% plot 1
+nexttile
+plot(rso2_hyp(rso2_row:interval_lengths(1,1),:),"timeCdt","rso2")
+hold on
+plot(spo2_hyp(spo2_row:interval_lengths(1,2),:),"timeCdt","SpO2")
+
+rso2_row = rso2_row + interval_lengths(1,1)
+spo2_row = spo2_row + interval_lengths(1,2)
+
+% plot 2
+nexttile
+plot(rso2_hyp(interval_lengths(1,1):rso2_row:interval_lengths(1,1)+interval_lengths(2,1),:),"timeCdt","rso2")
+hold on
+plot(spo2_hyp(interval_lengths(2,1):interval_lengths(2,1)+interval_lengths(2,2),:),"timeCdt","SpO2")
+
+% plot 3
+nexttile
+plot(rso2_hyp(interval_lengths(1,1)+interval_lengths(2,1):interval_lengths(1,1)+interval_lengths(2,1)+interval_lengths(3,1),:),"timeCdt","rso2")
+hold on
+plot(spo2_hyp(interval_lengths(2,1)+interval_lengths(2,2):interval_lengths(2,1)+interval_lengths(2,2)+interval_lengths(3,2),:),"timeCdt","SpO2")
 
