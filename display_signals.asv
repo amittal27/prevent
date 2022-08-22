@@ -73,6 +73,12 @@ end
 rso2_hyp = df_rso2(rel_rows,:);
 
 % remove irrelevant variables for sanity
-clear buffer_rso2 buffer_spo2 first_rows hyp_start i idx rel_rows rso2_times val time
+clear buffer_rso2 buffer_spo2 first_rows hyp_start i idx rel_rows rso2_times time val
     
+%% PLOT FILTERED TIME INTERVALS %%
+
+rso2_times = table2array(rso2_hyp(:,"timeCdt")); % create 1 col matrix
+d = diff(rso2_times); % used to determine each time interval
+
+
 

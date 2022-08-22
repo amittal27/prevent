@@ -59,6 +59,7 @@ hyp_start = table2array(hyp_start);
 % find NIRS time closest to start time
 rso2_times = table2array(df_rso2(:,"timeCdt")); % create 1 col matrix
 rel_rows = [];
+rel_rows_spo2 = [];
 
 for time=1:length(hyp_start)
     [val idx] = min(abs(rso2_times-hyp_start(time)));
@@ -66,14 +67,35 @@ for time=1:length(hyp_start)
         for i=idx:idx+first_rows(time,2)+buffer_rso2 % get up to one minute after end of hypoxia
             rel_rows = [rel_rows; i];
         end
+        for j=first_rows(time,1):first_rows(time,1)+first_rows(time,2)+2 % to second after end of hypoxia
+            rel_rows_spo2 = [rel_rows_spo2; j];
+        end
     end
 end
 
 % get desired table rows
 rso2_hyp = df_rso2(rel_rows,:);
+spo2_hyp = df_spo2(rel_rows_spo2,:);
 
 % remove irrelevant variables for sanity
-clear buffer_rso2 buffer_spo2 first_rows hyp_start i idx rel_rows rso2_times time val
+clear buffer_rso2 buffer_spo2 hyp_start i idx rel_rows rso2_times time val
     
 %% PLOT FILTERED TIME INTERVALS %%
+
+rso2_times = table2array(rso2_hyp(:,"timeCdt")); % create 1 col matrix
+rso2_d = diff(rso2_times); % used to determine each time interval
+num_tiles_rso2 = find(rso2_d > seconds(4)); % each row denotes end of time interval
+
+spo2_times = table2array(spo2_hyp(:,"timeCdt")); % create 1 col matrix
+spo2_d = diff(spo2_times); % used to determine each time interval
+num_tiles_spo2 = find(spo2_d > seconds(1)); % each row denotes end of time interval
+
+% create tiled plot
+figure
+t = tiledlayout(3, 1);
+nexttile
+plot(rso2_hyp(1:num_tiles(1),:),"timeCdt","rso2")
+hold on
+plot(rso2_hyp(1:num_tiles(1),:),"timeCdt","rso2")
+
 
