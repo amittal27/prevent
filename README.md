@@ -15,4 +15,4 @@ Respiratory signal comparison
 
 ##### read/
 
-This folder contains code snippets that helped with time syncing the Bedmaster/Medicollector and Somnostar data. Explore if you'd like.
+* This folder contains code snippets that helped with time syncing the Bedmaster/Medicollector and Somnostar data. Explore if you'd like.
