@@ -1,9 +1,12 @@
 
-%% read data from csv
+%% LOAD DATA %%
+% Note: SpO2 data are recorded every second, whereas rSO2 data were
+% collected every 4 seconds. %
 df_rso2 = readtable("2073\2073_rso2.csv");
 df_spo2 = readtable("2073\2073_spo2.csv");
 
-%% plot entire timeline
+%% GRAPH LARGE-SCALE %%
+% Show the overlay of SpO2 and rSO2 over entire time frame of data collection. %
 figure
 plot(df_spo2, "timeCdt", "SpO2");
 hold on
@@ -12,111 +15,114 @@ hold on
 yline(80)
 
 %% GET HYPOXIC EPISODES %%
-% filter data for relevant time intervals
+% Create a matrix with the start times for each hypoxic episode of length
+% 20 seconds or longer. Starting times will reference SpO2 data points (in CT)
+% that were collected every second. %
 
-spo2_mat = table2array(df_spo2(:,"SpO2")); % create 1 col matrix
+% Filter SpO2 dataset to retrieve only SpO2 <= 80.
+spo2_80less = find(table2array(df_spo2(:,"SpO2")) <= 80); % Double array of SpO2 values <= 80
+d = diff(spo2_80less); % 1s indicate low SpO2 values that occur time sequentially
 
-[a b] = find(spo2_mat <= 80); % row, col; only a is relevant
-d = diff(a); % determine sequential low SpO2 values
-
-count = 0;
-first_rows = [];
-for i=1:length(d) % get all of the relevant rows based on long hypoxic episodes
-    if d(i)==1 % count number of successive 1s
+% Get the rows in SpO2 table for hypoxic episodes >= 20 seconds.
+count = 0; % Counting the number of sequential low SpO2 values (i.e., the number of consecutive 1s)
+first_rows = []; % Double matrix of [(row number) (length of hypoxia)]
+for i=1:length(d) % Looping through the time differences between low SpO2 values
+    if d(i) == 1 % Count number of successive 1s; indicates hypoxia rather than discrete low values
         count = count + 1;
-    else
-        if count >= 20 % hypoxias >= 20 seconds long
-            first_row = a(i-count)-1; % second before start of hypoxia
-            first_rows = [first_rows; first_row count+2]; % for later use
+    else % Break in 1s; assess length of hypoxia
+        if count >= 20 % Only interested in hypoxias >= 20 seconds
+            first_row = spo2_80less(i-count)-1; % Get the second before start of episode
+            first_rows = [first_rows; first_row count+2]; % Record start and length
         end
-        count = 0;
+        count = 0; % Reset 1s counter
     end
 end
 
-% remove irrelevant variables for sanity
-clear a b count d first_row i j spo2_mat;
+% Remove variables that will no longer be used.
+clear spo2_80less d count i first_row;
 
 %% FILTER RSO2 AND SPO2 DATA %%
-buffer_rso2 = 15; % 15 rows buffer = 1 minute buffer
+% Get the time and value data from both the SpO2 and rSO2 datasets
+% utilizing the first_rows array that indicates the start of hypoxia
+% episodes based on SpO2 times. Must account for difference in sampling
+% rates for rSO2 (where data was collected every 4 seconds). %
 
-% get the corresponding time for the spo2 data for each hypoxia start
+buffer_rso2 = 15; % Get 1 minute before and after interval. 15 rows * 4 second sampling rate = 1 minute buffer
+buffer_spo2 = 60; % Get 1 minute before and after interval. 60 rows * 1 second sampling rate = 1 minute buffer
+
+% Get the corresponding time in CT from SpO2 data for start of each hypoxia.
 hyp_start = table2array(df_spo2(first_rows(:,1),"timeCdt"));
 
-% find NIRS time closest to each SpO2 start time
-rso2_times = table2array(df_rso2(:,"timeCdt")); % create 1 col matrix
-rel_rows_rso2 = [];
-rel_rows_spo2 = [];
-interval_lengths = []; % rso2 spo2;
+% Find rSO2 time closest to each SpO2 start time.
+rso2_times = table2array(df_rso2(:,"timeCdt")); % Convert times to a 1 column array
+rel_rows_rso2 = []; % All rSO2 row numbers for hypoxias
+rel_rows_spo2 = []; % All SpO2 row numbers for hypoxias
+interval_lengths = []; % Matrix of [rso2 spo2]
 
-for time=1:length(hyp_start)
-    [val idx] = min(abs(rso2_times-hyp_start(time)));
-    if val <= duration(0, 1, 0) % time interval was matched
-        if ~isnan(table2array(df_rso2(idx, "rso2"))) % don't get rows without valid values
-            % at this point, time interval deemed valid
-            count = first_rows(time,2);
+for time=1:length(hyp_start) % Loop through start times of all hypoxias
+    % Find the duration between the start of a hypoxia and the closest rSO2
+    % value recorded.
+    [val idx] = min(abs(rso2_times-hyp_start(time))); % val = duration, idx = row number for matched rSO2 value
+
+    % A match is found if the duration between the hypoxia start (in terms
+    % of SpO2 sampling) is within 4 seconds of the closest rSO2 time.
+    if val <= duration(0, 1, 0) % Time interval was matched
+        if ~isnan(table2array(df_rso2(idx, "rso2"))) % Eliminate rows with invalid data
+            % At this point, there is a hypoxia episode >= 20 seconds AND
+            % recorded rSO2 data during that time frame.
+            count = first_rows(time,2); % Get length of hypoxia
             
-            % retrieve rso2 rows
-            counter1 = 0;
-            for i=idx-buffer_rso2:idx+(count/4)+buffer_rso2 % +/- 1 minute around hypoxia
+            % Retrieve rSO2 rows during hypoxia.
+            counter1 = 0; % Length of hypoxia in terms of rSO2 sampling rate
+            for i=idx-buffer_rso2:idx+(count/4)+buffer_rso2 % +/- 1 minute around hypoxia while accounting for sampling rate
                 rel_rows_rso2 = [rel_rows_rso2; i];
                 counter1 = counter1 + 1;
             end
 
-            % retrieve spo2 rows
-            spo2_row = first_rows(time,1);
-            counter2 = 0;
-            for i=spo2_row:spo2_row+count
+            % Retrieve SpO2 rows during hypoxia.
+            spo2_row = first_rows(time,1); % Get the start time from first_rows, which has hypoxia episodes already in terms of SpO2 sampling rate
+            counter2 = 0; % Length of hypoxia in terms of SpO2 sampling rate
+            for i=spo2_row-buffer_spo2:spo2_row+count+buffer_spo2 % +/- 1 minute around hypoxia while accounting for sampling rate
                 rel_rows_spo2 = [rel_rows_spo2; i];
                 counter2 = counter2 + 1;
             end
 
-            % interval lengths for each measurement
+            % Record the hypoxia episode lengths for [rSO2 SpO2] in terms
+            % of respective sampling rates.
             interval_lengths = [interval_lengths; counter1 counter2];
         end
     end
 end
 
-% get desired table rows
+% Get desired table rows (including time and respiratory value) for relevant rows.
 rso2_hyp = df_rso2(rel_rows_rso2,:);
 spo2_hyp = df_spo2(rel_rows_spo2,:);
 
-% remove irrelevant variables for sanity
-clear count counter1 counter2 buffer_rso2 i idx rel_rows_rso2 rel_rows_spo2 time spo2_row rso2_times first_rows hyp_start val
+% Remove variables that will no longer be used.
+clear count counter1 counter2 buffer_rso2 buffer_spo2 i idx val;
+clear rel_rows_rso2 rel_rows_spo2 time spo2_row rso2_times first_rows hyp_start;
     
 %% PLOT FILTERED TIME INTERVALS %%
+% Graph each of the hypoxia episodes that contain both SpO2 and rSO2 data. %
 
-% create tiled plot
+% Create plot with subplots for each hypoxia.
 figure
-t = tiledlayout(3, 1);
-rso2_row = 1;
-spo2_row = 1;
+t = tiledlayout(length(interval_lengths), 1);
+rso2_row = 0; % Row number in rso2_hyp corresponding to distinct hypoxia
+spo2_row = 0; % Row number in spo2_hyp corresponding to distinct hypoxia
 
-% plot 1
-nexttile
-plot(rso2_hyp(rso2_row:interval_lengths(1,1),:),"timeCdt","rso2")
-hold on
-plot(spo2_hyp(spo2_row:interval_lengths(1,2),:),"timeCdt","SpO2")
+% Create each subplot.
+for i=1:length(interval_lengths)
+    nexttile
+    
+    plot(rso2_hyp(rso2_row+1:rso2_row+interval_lengths(i,1)-1,:),"timeCdt","rso2") % Draw rSO2 signal
+    hold on
+    plot(spo2_hyp(spo2_row+1:spo2_row+interval_lengths(i,2)-1,:),"timeCdt","SpO2") % Draw SpO2 signal
 
-rso2_row = rso2_row + interval_lengths(1,1);
-spo2_row = spo2_row + interval_lengths(1,2);
+    % Increment by current episode length to update index to next episode.
+    rso2_row = rso2_row + interval_lengths(i,1);
+    spo2_row = spo2_row + interval_lengths(i,2);
+end
 
-% plot 2
-nexttile
-plot(rso2_hyp(rso2_row:rso2_row+interval_lengths(2,1)-1,:),"timeCdt","rso2")
-hold on
-plot(spo2_hyp(spo2_row:spo2_row+interval_lengths(2,2)-1,:),"timeCdt","SpO2")
-
-rso2_row = rso2_row + interval_lengths(2,1);
-spo2_row = spo2_row + interval_lengths(2,2);
-
-% plot 3
-nexttile
-plot(rso2_hyp(rso2_row:rso2_row+interval_lengths(3,1)-1,:),"timeCdt","rso2")
-hold on
-plot(spo2_hyp(spo2_row:spo2_row+interval_lengths(3,2)-1,:),"timeCdt","SpO2")
-
-rso2_row = rso2_row + interval_lengths(3,1);
-spo2_row = spo2_row + interval_lengths(3,2);
-
-% remove irrelevant variables for sanity
-clear rso2_row spo2_row
+% Remove variables that will no longer be used.
+clear rso2_row spo2_row i
