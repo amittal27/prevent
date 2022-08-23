@@ -19,7 +19,7 @@ Respiratory signal comparison
 
 * `display_apnea.m` : Display full timescale of apneic episodes with rSO2  signals.
 
-~[Example display_apnea.m generated graph](/supplemental/display_apnea.png)
+![Example display_apnea.m generated graph](/supplemental/display_apnea.png)
 
 * `display_signals.ipynb` : A Jupyter notebook for exploratory data analysis.
 
