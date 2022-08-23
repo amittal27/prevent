@@ -1,6 +1,7 @@
 
 %% CONFIGURE_SIGNALS %%
-% Find hypoxic episodes given SpO2 and rSO2 datasets. %
+% Find hypoxic episodes given SpO2 and rSO2 datasets. Find apneic 
+% episodes given chest impedance data. %
 
 %% LOAD DATA %%
 % Note: SpO2 data are recorded every second, whereas rSO2 data were

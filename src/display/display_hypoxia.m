@@ -1,6 +1,6 @@
 
 %% DISPLAY_HYPOXIA %%
-% Display rSO2 and SpO2 signals for each hypoxic episodes as individual subplots. %
+% Display rSO2 and SpO2 signals for each hypoxic episode as individual subplots. %
 
 %% PLOT FILTERED TIME INTERVALS %%
 % Graph each of the hypoxia episodes that contain both SpO2 and rSO2 data. %
