@@ -10,7 +10,13 @@ Respiratory signal comparison
 ##### display/
 
 * `display_hypoxia.m` : Display rSO2 and SpO2 signals for each hypoxic episodes as individual subplots.
+
+![Example display_hypoxia.m generated graph](/supplemental/display_hypoxia.png)
+
 * `display_large.m` : Display full timescale of SpO2 and rSO2 over time.
+
+![Example display_large.m generated graph](/supplemental/display_large.png)
+
 * `display_signals.ipynb` : A Jupyter notebook for exploratory data analysis.
 
 ##### read/

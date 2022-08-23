@@ -10,3 +10,6 @@ hold on
 plot(df_rso2, "timeCdt", "rso2");
 hold on
 yline(80)
+hold off
+
+legend("SpO2", "rSO2")
