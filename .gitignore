@@ -1,10 +1,4 @@
-*.edf
-*.rec
-*.mat
-*.hdf5
-*.nms
-*.xlsx
-*.csv
-*.png
+data/
 NICUHDF5Viewer-4.2/
 old/
+*.asv
