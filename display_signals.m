@@ -125,4 +125,4 @@ for i=1:length(interval_lengths)
 end
 
 % Remove variables that will no longer be used.
-clear rso2_row spo2_row i
+clear rso2_row spo2_row i;
