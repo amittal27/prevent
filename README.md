@@ -35,8 +35,6 @@ Respiratory signal comparison
 
    ![12 second moving averages generated from display_avg.m](/supplemental/display_avg_12s.png)
 
-* `display_signals.ipynb` : A Jupyter notebook for exploratory data analysis.
-
 ##### read/
 
 * This folder contains code snippets that helped with time syncing the Bedmaster/Medicollector and Somnostar data. Explore if you'd like.
