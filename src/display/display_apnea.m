@@ -9,7 +9,7 @@ cd('NICUHDF5Viewer-4.2/')
 filename = ['data/2073/20190703000000_PreVent_Patient_2073_MC9_20190703_1.hdf5'];
 [resp_data,name,info]=getfiledata(filename,'Resp');
 [resp,respxt,respxfs,info,respt] = formatdata(resp_data,info,3,1);
-resp_datetime = datetime(resp.t/1000,'ConvertFrom','posixTime','Format','dd-MMM-yyyy HH:mm:ss.SSS');
+resp_datetime = datetime(resp.t/1000,'ConvertFrom','posixTime','Format','dd-MMM-yyyy HH:mm:ss.SSS')-hours(4)-minutes(59)-seconds(17);
 cd('..')
 
 % Configure rSO2 data.
