@@ -1,49 +1,70 @@
 
 %% LOCATE_60S_HYPOXIA %%
-% Get files for patients having hypoxic episodes that are 60 seconds or longer
-% given a valid Somnostar (and therefore, a valid NIRS) file at a
-% corresponding date. %
+% From patient files where we have Somnostar data, look into the
+% results.mat files to see find hypoxias >= 60 seconds. %
 
 %% LOAD DATA %%
-%som_times = readtable("E:\Angeli\somnostar_times.csv");
-som_times = readtable("E:\RESEARCH\prevent\data\somnostar_times.csv");
-som_date_arr = table2array(som_times(:,"date")); % Convert to array for later use
-src = fullfile("E:\UVA_Prevent Data");
+src_str = "E:\RESEARCH\prevent\data\results";
+files_with_hypoxias = [];
+
+cd(src_str) % Travel to results/ directory
 
 %% FIND LONG HYPOXIAS %%
-% Get file path from somnostar, find the corresponding results file, see if
-% there is at least one hypoxia >= 60 seconds. If so, copy over the HDF5
-% file that corresponds. %
+% For each results file, check for at least one hypoxia >= 60 seconds. 
+% If one exists, store the filename. %
 
-% Loop through each distinct data collection date.
-for i=1:height(som_times)
-    % Get portions relevant for path construction.
-    pt = som_times(i,"folder");
-    date = char(som_date_arr(i,1)); % Convert date to substring-able format
-    mm = date(1:2); % Month
-    dd = date(3:4); % Day
-    yy = date(6:7); % Year
-    file_date = "20"+yy+mm+dd;
-    keyword = "results";
+% Load each results file by iterating through the subdirectories.
+results_dir = dir(src_str);
+for i=3:length(results_dir)
 
-end
+    % Travel to patient subdirectory.
+    curr_pt_dir = results_dir(i).name; % Get the name of the current subdirectory
+    cd(curr_pt_dir)
 
+    % Get contents of patient subdirectory.
+    file_pt_lst = dir;
+    for j=3:length(file_pt_lst)
+        filename = file_pt_lst(j).name;
+        [~,~,ext] = fileparts(which(filename));
 
-%% FUNCTION DECLARATIONS %%
-% get_results : tkktk -> tktk
-% tktktk
-function results = get_results(num, df, str_time, str_val)
-    % Convert table columns to array.
-    times = table2array(df(:,str_time));
-    vals = table2array(df(:,str_val));
-    avgs = []; % Column array of moving averages
+        % Parse each results.mat file.
+        if length(ext) == 4 % Length of 4 = .mat rather than .hdf5
+            % Load results.mat file.
+            load(filename)
+            
+            % Get hypoxias, calculate episode length from results.mat file.
+            hypoxia_row_in_results = find(strcmp(result_name(:,1),'/Results/Desat<80')); % Get the row for hypoxia results
+            if (~isempty(hypoxia_row_in_results) && ~isempty(result_tags(hypoxia_row_in_results).tagtable)) % Hypoxia results are available for examination
+                hyp_start_datetime = datetime(result_tags(hypoxia_row_in_results).tagtable(:,1)/1000,'ConvertFrom','posixTime','Format','dd-MMM-yyyy HH:mm:ss.SSS');
+                hyp_stop_datetime = datetime(result_tags(hypoxia_row_in_results).tagtable(:,2)/1000,'ConvertFrom','posixTime','Format','dd-MMM-yyyy HH:mm:ss.SSS');
+            end
+            hypoxia_start_end = [hyp_start_datetime hyp_stop_datetime]; % Store [start end] times for hypoxic episode
+            hypoxia_duration = hyp_stop_datetime-hyp_start_datetime; % Calculate corresponding duration for each episode
+            rel_rows = []; % Store the rows with long episodes
 
-    % Calculate and store moving averages.
-    for i=num:length(times)
-        avg = mean(vals(i-num+1:i)); % Take mean of num numbers within values array
-        avgs = [avgs; avg]; % Store moving average
+            % Get the rows where hypoxia durations are >= 60 seconds.
+            for i=1:length(hypoxia_duration)
+                if hypoxia_duration(i)>=seconds(60)
+                    rel_rows = [rel_rows; i];
+                end
+            end
+
+            % Save results, if they exist.
+            if ~isempty(rel_rows)
+                % Save data into a .mat file.
+                save('HYPOXIA_'+string(filename), 'hypoxia_start_end', 'hypoxia_duration', 'rel_rows')
+            
+                % Log the filename to record which files contain these long hypoxias.
+                files_with_hypoxias = [files_with_hypoxias; "HYPOXIA_"+string(filename)];
+            end
+
+            
+        end
     end
 
-    % Table output of times, moving average values.
-    avgs = table(times(num:length(times)),avgs,'VariableNames',[str_time,str_val+"_avg"]);
+    % Clear loaded .mat file
+    clear info result_name result_data result_tags result_tagcolumns result_tagtitle result_qrs
+
+    % Travel back to parent directory to look at next patient.
+    cd('..') 
 end
