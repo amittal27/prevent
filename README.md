@@ -35,6 +35,10 @@ Respiratory signal comparison
 
    ![12 second moving averages generated from display_avg.m](/supplemental/display_avg_12s.png)
 
+* `display_apnea_hypoxia.m` : Display synchronized plots of 1) SpO2 vs. rSO2 and 2) apnea vs. rSO2.
+
+![Example display_apnea_hypoxia.m generated graph](/supplemental/display_apnea_hypoxia.png)
+
 ##### read/
 
 * This folder contains code snippets that helped with time syncing the Bedmaster/Medicollector and Somnostar data. Explore if you'd like.
