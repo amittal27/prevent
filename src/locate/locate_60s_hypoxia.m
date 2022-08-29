@@ -55,7 +55,7 @@ for i=3:length(results_dir)
                 save('HYPOXIA_'+string(filename), 'hypoxia_start_end', 'hypoxia_duration', 'rel_rows')
             
                 % Log the filename to record which files contain these long hypoxias.
-                files_with_hypoxias = [files_with_hypoxias; "HYPOXIA_"+string(filename)];
+                files_with_hypoxias = [files_with_hypoxias; curr_pt_dir "HYPOXIA_"+string(filename)];
             end
 
             

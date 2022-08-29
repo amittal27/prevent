@@ -1,6 +1,6 @@
 % Getting the file name
 
-filename = '2080001.edf';
+filename = 'data/2004/2004001.edf';
 
 % Getting information about the data using edfinfo
 
@@ -38,7 +38,7 @@ clear time_sec;
 % files
 % otherwise might be ["EKG" "EKG2" "THOR" "ABDM" "SUM"] 
 [som_data annotation] = edfread(filename, ...
-        'SelectedSignals',["EKG" "EKG2" "THOR" "ABDM" "SUM"],...
+        'SelectedSignals',["25" "26" "DC01" "DC02" "DC03"],...
         'DataRecordOutputType','vector',...
         'TimeOutputType','duration');
 
@@ -51,11 +51,11 @@ resp_count_end = 100;
 time_vector = [];
 
     for i=1:som_nrec
-        som_ekg(ekg_count_start:ekg_count_end) = som_data.EKG{i,1};
-        som_ekg2(ekg_count_start:ekg_count_end) = som_data.EKG2{i,1};
-        som_thor(resp_count_start:resp_count_end) = som_data.THOR{i,1};
-        som_abd(resp_count_start:resp_count_end) = som_data.ABDM{i,1};
-        som_sum(resp_count_start:resp_count_end) = som_data.SUM{i,1};
+        som_ekg(ekg_count_start:ekg_count_end) = som_data.x25{i,1};
+        som_ekg2(ekg_count_start:ekg_count_end) = som_data.x26{i,1};
+        som_thor(resp_count_start:resp_count_end) = som_data.DC01{i,1};
+        som_abd(resp_count_start:resp_count_end) = som_data.DC02{i,1};
+        som_sum(resp_count_start:resp_count_end) = som_data.DC03{i,1};
         % change x25=EKG, x26=EKG2
         % change THOR, ABDM, SUM to DC01=THOR, DC02=ABDM, DC03=SUM
 
