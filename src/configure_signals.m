@@ -6,8 +6,8 @@
 %% LOAD DATA %%
 % Note: SpO2 data are recorded every second, whereas rSO2 data were
 % collected every 4 seconds. %
-df_rso2 = readtable("data\2073\2073_rso2.csv");
-df_spo2 = readtable("data\2073\2073_spo2.csv");
+df_rso2 = readtable("data\2085\2085_rso2.csv");
+df_spo2 = readtable("data\2085\2085_spo2.csv");
 
 %% GET HYPOXIC EPISODES %%
 % Create a matrix with the start times for each hypoxic episode of length
@@ -25,7 +25,7 @@ for i=1:length(d) % Looping through the time differences between low SpO2 values
     if d(i) == 1 % Count number of successive 1s; indicates hypoxia rather than discrete low values
         count = count + 1;
     else % Break in 1s; assess length of hypoxia
-        if count >= 20 % Only interested in hypoxias >= 20 seconds
+        if count >= 10 % Only interested in hypoxias >= 20 seconds
             first_row = spo2_80less(i-count)-1; % Get the second before start of episode
             first_rows = [first_rows; first_row count+2]; % Record start and length
         end
@@ -57,7 +57,7 @@ interval_lengths = []; % Matrix of [rso2 spo2]
 for time=1:length(hyp_start) % Loop through start times of all hypoxias
     % Find the duration between the start of a hypoxia and the closest rSO2
     % value recorded.
-    [val idx] = min(abs(rso2_times-hyp_start(time))); % val = duration, idx = row number for matched rSO2 value
+    [val, idx] = min(abs(rso2_times-hyp_start(time))); % val = duration, idx = row number for matched rSO2 value
 
     % A match is found if the duration between the hypoxia start (in terms
     % of SpO2 sampling) is within 4 seconds of the closest rSO2 time.

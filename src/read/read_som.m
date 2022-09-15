@@ -37,7 +37,7 @@ clear time_sec;
 % replace selectedsignals with ["25" "26" "DC01" "DC02" "DC03"] for most
 % files
 % otherwise might be ["EKG" "EKG2" "THOR" "ABDM" "SUM"] 
-[som_data annotation] = edfread(filename, ...
+[som_data, annotation] = edfread(filename, ...
         'SelectedSignals',["25" "26" "DC01" "DC02" "DC03"],...
         'DataRecordOutputType','vector',...
         'TimeOutputType','duration');
@@ -70,7 +70,7 @@ time_vector = [];
 
 
     % find returns row,col
-    [a b] = find(som_sum < 10 & som_sum > -10);
+    [a, b] = find(som_sum < 10 & som_sum > -10);
 
     % sampling rate is 50, 10 seconds of 1s = 
     d = diff(b);
