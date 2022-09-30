@@ -6,8 +6,8 @@
 %% LOAD DATA %%
 % Note: SpO2 data are recorded every second, whereas rSO2 data were
 % collected every 4 seconds. %
-df_rso2 = readtable("data\2085\2085_rso2.csv");
-df_spo2 = readtable("data\2085\2085_spo2.csv");
+df_rso2 = readtable("data\2141\2141_rso2.csv");
+df_spo2 = readtable("data\2141\2141_spo2.csv");
 
 %% GET HYPOXIC EPISODES %%
 % Create a matrix with the start times for each hypoxic episode of length
@@ -25,7 +25,7 @@ for i=1:length(d) % Looping through the time differences between low SpO2 values
     if d(i) == 1 % Count number of successive 1s; indicates hypoxia rather than discrete low values
         count = count + 1;
     else % Break in 1s; assess length of hypoxia
-        if count >= 10 % Only interested in hypoxias >= 20 seconds
+        if count >= 60 % Only interested in hypoxias >= 20 seconds
             first_row = spo2_80less(i-count)-1; % Get the second before start of episode
             first_rows = [first_rows; first_row count+2]; % Record start and length
         end

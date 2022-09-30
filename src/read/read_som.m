@@ -1,6 +1,6 @@
 % Getting the file name
 
-filename = 'data/2004/2004001.edf';
+filename = 'data/2141/2141001.edf';
 
 % Getting information about the data using edfinfo
 

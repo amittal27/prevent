@@ -27,6 +27,11 @@ for i=1:length(interval_lengths)
     % Increment by current episode length to update index to next episode.
     rso2_row = rso2_row + interval_lengths(i,1);
     spo2_row = spo2_row + interval_lengths(i,2);
+
+    % Not to overwhelm the figures
+    if mod(i+1, 3) == 0
+        figure
+    end
 end
 
 % Remove variables that will no longer be used.
