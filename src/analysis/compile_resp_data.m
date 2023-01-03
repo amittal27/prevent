@@ -5,7 +5,7 @@
 %% LOAD DATA %%
 % Note: SpO2 data are recorded every second, whereas rSO2 data were
 % collected every 4 seconds. %
-pt_num = "2037";
+pt_num = "2141";
 df_rso2 = readtable(strcat("data\cohort\", pt_num, "\", pt_num, "_rso2.csv"));
 df_spo2 = readtable(strcat("data\cohort\", pt_num, "\", pt_num, "_spo2.csv"));
 
@@ -37,4 +37,4 @@ end
 
 % Add SpO2 column to df_rso2_spo2 table.
 df_rso2_spo2 = addvars(df_rso2_spo2, spo2_4s_sampling, 'NewVariableNames', 'spo2');
-save(strcat("E:\RESEARCH\prevent\data\cohort\", pt_num, "\", pt_num, "_df_rso2_spo2.mat"), "df_rso2_spo2");
+save(strcat("E:\RESEARCH\prevent\data\cohort\", pt_num, "\", pt_num, "_df_rso2_spo2.mat"), "df_rso2_spo2", "pt_num", "df_rso2", "df_spo2");
