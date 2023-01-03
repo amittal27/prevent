@@ -4,13 +4,13 @@
 % results.mat files to see find hypoxias >= 60 seconds. %
 
 %% LOAD DATA %%
-src_str = "E:\RESEARCH\prevent\data\results";
+src_str = "E:\\RESEARCH\\prevent\\data\\results_2";
 files_with_hypoxias = [];
 
 cd(src_str) % Travel to results/ directory
 
 %% FIND LONG HYPOXIAS %%
-% For each results file, check for at least one hypoxia >= 60 seconds. 
+% For each results file, check for at least one hypoxia >= 30 seconds. 
 % If one exists, store the filename. %
 
 % Load each results file by iterating through the subdirectories.

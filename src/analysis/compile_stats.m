@@ -1,13 +1,10 @@
 
-%% CONFIGURE_SIGNALS %%
-% Find hypoxic episodes given SpO2 and rSO2 datasets. Find apneic 
-% episodes given chest impedance data. %
+%% COMPILE_STATS %%
+% Calculate stuff. %
 
-%% LOAD DATA %%
-% Note: SpO2 data are recorded every second, whereas rSO2 data were
-% collected every 4 seconds. %
-df_rso2 = readtable("data\cohort\2037\2037_rso2.csv");
-df_spo2 = readtable("data\cohort\2037\2037_spo2.csv");
+%% GET NON-HYPOXIC DATA %%
+
+% Get the indices for just the hypoxic intervals
 
 %% GET HYPOXIC EPISODES %%
 % Create a matrix with the start times for each hypoxic episode of length
@@ -32,6 +29,8 @@ for i=1:length(d) % Looping through the time differences between low SpO2 values
         count = 0; % Reset 1s counter
     end
 end
+
+
 
 % Remove variables that will no longer be used.
 %clear spo2_80less d count i first_row;
@@ -127,4 +126,4 @@ rso2_no_hyp(rso2_nan,:) = []; % Take out rows that contain non-numeric values.
 rso2_baseline = mean(table2array(rso2_no_hyp(:,"rso2")));
 rso2_stddev = std(table2array(rso2_no_hyp(:,"rso2")));
 
-%clear rso2_hyp_indices rso2_nan;
+%clear rso2_hyp_indices rso2_nan

@@ -19,10 +19,10 @@ for i=1:length(interval_lengths)
     plot(rso2_hyp(rso2_row+1:rso2_row+interval_lengths(i,1)-1,:),"timeCdt","rso2") % Draw rSO2 signal
     hold on
     yyaxis right
-    plot(spo2_hyp(spo2_row+1:spo2_row+interval_lengths(i,2)-1,:),"timeCdt","SpO2") % Draw SpO2 signal
+    plot(spo2_hyp(spo2_row+1:spo2_row+interval_lengths(i,2)-1,:),"timeCdt","spo2") % Draw SpO2 signal
     hold off
     
-    legend("rSO2", "SpO2")
+    legend("rSO2", "spo2")
 
     % Increment by current episode length to update index to next episode.
     rso2_row = rso2_row + interval_lengths(i,1);
